@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from django.test import Client, TestCase
 
 from bootcamp.articles.models import Article
+from bootcamp.feeds.models import Feed
 from bootcamp.questions.models import Question
 
 
@@ -12,6 +13,7 @@ class TestViews(TestCase):
     Includes tests for all the functionality
     associated with Views
     """
+
     def setUp(self):
         self.client = Client()
         self.other_client = Client()
@@ -36,8 +38,21 @@ class TestViews(TestCase):
         self.article = Article.objects.create(
             create_user=self.user, title='A really nice title',
             content=self.content, tags='list, lists', status='P')
+
         self.article_2 = Article.objects.create(create_user=self.other_user, title='A bad title',
                                                 content="Bad content", tags='bad', status='P')
+
+        self.feed = Feed.objects.create(
+            user=self.user,
+            post='This is a feed',
+            likes=0,
+            comments=0)
+
+        self.feed_2 = Feed.objects.create(
+            user=self.other_user,
+            post='This is another feed',
+            likes=0,
+            comments=0)
 
         self.question_one = Question.objects.create(
             user=self.user, title='This is a sample question',
@@ -55,10 +70,31 @@ class TestViews(TestCase):
             has_accepted_answer=True
         )
 
+    def test_search_noqeury_redirectToSearchPage(self):
+        response = self.client.get('/search')
+        self.assertRedirects(response, '/search/', 301)
+
+    def test_search_queryWithZeroLength_redirectToSearchPage(self):
+        response = self.client.get('/search/?q=')
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/search/', status_code=302)
+
+    def test_search_queryWithoutSearchType_viewAllFeeds(self):
+        response = self.client.get('/search/?q=a')
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(self.feed.post in response.content)
+        self.assertTrue(self.feed_2.post in response.content)
+
+    def test_search_queryWithArticleSearchType_viewAllArticles(self):
+        response = self.client.get('/search/?q=a&type=articles')
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(self.article.title in response.content)
+        self.assertTrue(self.article_2.title in response.content)
+
     def test_autocomplete_question_suggestions(self):
         search_term = "short"
         question_search_response = self.client.get(
-            '/autocomplete/?term='+search_term,
+            '/autocomplete/?term=' + search_term,
             HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         question_search_suggestions_dict = question_search_response.json()
         self.assertEqual(
@@ -67,7 +103,7 @@ class TestViews(TestCase):
     def test_autocomplete_article_suggestions(self):
         search_term = "title"
         question_search_response = self.client.get(
-            '/autocomplete/?term='+search_term,
+            '/autocomplete/?term=' + search_term,
             HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         question_search_suggestions_dict = question_search_response.json()
         self.assertEqual(
@@ -76,7 +112,7 @@ class TestViews(TestCase):
     def test_autocomplete_user_suggestions(self):
         search_term = "other"
         question_search_response = self.client.get(
-            '/autocomplete/?term='+search_term,
+            '/autocomplete/?term=' + search_term,
             HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         question_search_suggestions_dict = question_search_response.json()
         self.assertEqual(
