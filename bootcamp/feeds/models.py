@@ -77,3 +77,19 @@ class Feed(models.Model):
 
     def linkfy_post(self):
         return bleach.linkify(escape(self.post))
+
+    def retweet(self, user):
+        if self.user == user:
+            raise Exception("Feed owner cannot retweet it's feed.")
+        if user in self.retweeters.iterator():
+            raise Exception("User already retweetted current feed.")
+        self.retweeters.add(user)
+        self.save()
+
+    def remove_retweet(self, user):
+        if self.user == user:
+            raise Exception("Invalid action.")
+        if user not in self.retweeters.iterator():
+            raise Exception("User didn't retweetted current feed before.")
+        self.retweeters.remove(user)
+        self.save()
