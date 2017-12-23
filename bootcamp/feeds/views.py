@@ -228,3 +228,25 @@ def remove(request):
 
     except Exception:
         return HttpResponseBadRequest()
+
+@login_required
+@ajax_required
+def retweet(request):
+    try:
+        feed_id = request.POST.get('feed')
+        feed = Feed.objects.get(pk=feed_id)
+        feed.retweet(request.user)
+        return HttpResponse()
+    except Exception:
+        return HttpResponseBadRequest()
+
+@login_required
+@ajax_required
+def remove_retweet(request):
+    try:
+        feed_id = request.POST.get('feed')
+        feed = Feed.objects.get(pk=feed_id)
+        feed.remove_retweet(request.user)
+        return HttpResponse()
+    except Exception:
+        return HttpResponseBadRequest()
