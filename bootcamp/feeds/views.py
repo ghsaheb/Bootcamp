@@ -10,14 +10,25 @@ from django.template.loader import render_to_string
 
 from bootcamp.activities.models import Activity
 from bootcamp.decorators import ajax_required
-from bootcamp.feeds.models import Feed
+from bootcamp.feeds.models import Feed, Retweet
 
 FEEDS_NUM_PAGES = 10
 
 
 @login_required
 def feeds(request):
-    all_feeds = Feed.get_feeds()
+    all_feeds = []
+    for feed in Feed.get_feeds():
+        all_feeds.append(feed)
+
+    for ret in Retweet.objects.iterator():
+        retweetted_feed = ret.feed
+        retweetted_feed.owner = ret.user
+        retweetted_feed.date = ret.date
+        retweetted_feed.is_retweetted_feed = True
+        all_feeds.append(retweetted_feed)
+
+    all_feeds.sort(key=lambda x: x.date, reverse=True)
     paginator = Paginator(all_feeds, FEEDS_NUM_PAGES)
     feeds = paginator.page(1)
     from_feed = -1
@@ -230,10 +241,9 @@ def remove(request):
         return HttpResponseBadRequest()
 
 @login_required
-@ajax_required
 def retweet(request):
     try:
-        feed_id = request.POST.get('feed')
+        feed_id = request.GET.get('feed')
         feed = Feed.objects.get(pk=feed_id)
         feed.retweet(request.user)
         return HttpResponse()
@@ -241,10 +251,9 @@ def retweet(request):
         return HttpResponseBadRequest()
 
 @login_required
-@ajax_required
 def remove_retweet(request):
     try:
-        feed_id = request.POST.get('feed')
+        feed_id = request.GET.get('feed')
         feed = Feed.objects.get(pk=feed_id)
         feed.remove_retweet(request.user)
         return HttpResponse()
