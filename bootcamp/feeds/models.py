@@ -9,7 +9,6 @@ from django.utils.translation import ugettext_lazy as _
 import bleach
 from bootcamp.activities.models import Activity
 
-
 @python_2_unicode_compatible
 class Feed(models.Model):
     user = models.ForeignKey(User)
@@ -18,7 +17,7 @@ class Feed(models.Model):
     parent = models.ForeignKey('Feed', null=True, blank=True)
     likes = models.IntegerField(default=0)
     comments = models.IntegerField(default=0)
-    retweeters = models.ManyToManyField(User, related_name='retweets')
+    retweeters = models.ManyToManyField(User, through='Retweet', related_name='Retweets')
 
     class Meta:
         verbose_name = _('Feed')
@@ -81,15 +80,26 @@ class Feed(models.Model):
     def retweet(self, user):
         if self.user == user:
             raise Exception("Feed owner cannot retweet it's feed.")
-        if user in self.retweeters.iterator():
+        if Retweet.objects.filter(user__id=user.id, feed__id=self.id).count() > 0:
             raise Exception("User already retweetted current feed.")
-        self.retweeters.add(user)
-        self.save()
+        ret = Retweet()
+        ret.user = user
+        ret.feed = self
+        ret.save()
 
     def remove_retweet(self, user):
         if self.user == user:
             raise Exception("Invalid action.")
-        if user not in self.retweeters.iterator():
+        if Retweet.objects.filter(user__id=user.id, feed__id=self.id).count() == 0:
             raise Exception("User didn't retweetted current feed before.")
-        self.retweeters.remove(user)
-        self.save()
+        Retweet.objects.filter(user__id=user.id, feed__id=self.id).delete()
+
+class Retweet(models.Model):
+    user = models.ForeignKey(User)
+    date = models.DateTimeField(auto_now_add=True)
+    feed = models.ForeignKey(Feed)
+
+    class Meta:
+        verbose_name = _('Retweet')
+        verbose_name_plural = _('Retweets')
+        ordering = ('-date',)
