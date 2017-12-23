@@ -18,6 +18,7 @@ class Feed(models.Model):
     parent = models.ForeignKey('Feed', null=True, blank=True)
     likes = models.IntegerField(default=0)
     comments = models.IntegerField(default=0)
+    retweeters = models.ManyToManyField(User, related_name='retweets')
 
     class Meta:
         verbose_name = _('Feed')
