@@ -11,6 +11,7 @@
       <h3><a href="{% url 'profile' feed.user.username %}">{{ feed.user.profile.get_screen_name }}</a> <small>{{ feed.date|naturaltime }}</small></h3>
       <p>{{ feed.linkfy_post|safe }}</p>
       <div class="interaction">
+
         {% if user in feed.get_likers %}
           <a href="#" style="text-decoration: none;" class="like unlike">
             <span class="glyphicon glyphicon-thumbs-up"></span>
@@ -24,6 +25,21 @@
             (<span class="like-count">{{ feed.likes }}</span>)
           </a>
         {% endif %}
+
+{#      **************** **************** **************** ****************       #}
+        {% if user in feed.get_spammers %}
+          <a href="#" style="text-decoration: none;" class="spam unspam">
+            <span class="text">{% trans 'Unspam' %}</span>
+            (<span class="spam-count">{{ feed.spams }}</span>)
+          </a>
+        {% else %}
+          <a href="#" style="text-decoration: none;" class="spam">
+            <span class="text">{% trans 'Spam' %}</span>
+            (<span class="spam-count">{{ feed.spams }}</span>)
+          </a>
+        {% endif %}
+{#      **************** **************** **************** ****************       #}
+
         <a href="#" style="text-decoration: none;" class="comment">
           <span class="glyphicon glyphicon-comment"></span> {% trans 'Comment' %}
           (<span class="comment-count">{{ feed.comments }}</span>)

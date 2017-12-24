@@ -26,6 +26,9 @@ class TestViews(TestCase):
             user=self.user,
             post='A not so long text',
             likes=0,
+# *********************** *********************** *********************** ***********************
+            spams=0,
+# *********************** *********************** *********************** ***********************
             comments=0
         )
         self.notification = Notification.objects.create(

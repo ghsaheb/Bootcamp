@@ -44,6 +44,9 @@ class TestModels(TestCase):
             user=self.other_user,
             post='A not so long text',
             likes=0,
+# ****************** ****************** ****************** ****************** ******************
+            spams=0,
+# ****************** ****************** ****************** ****************** ******************
             comments=0
         )
         self.question = Question.objects.create(

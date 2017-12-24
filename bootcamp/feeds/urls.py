@@ -6,6 +6,9 @@ urlpatterns = [
     url(r'^$', views.feeds, name='feeds'),
     url(r'^post/$', views.post, name='post'),
     url(r'^like/$', views.like, name='like'),
+# **************************** **************************** ****************************
+    url(r'^spam/$', views.spam, name='spam'),
+# **************************** **************************** ****************************
     url(r'^comment/$', views.comment, name='comment'),
     url(r'^load/$', views.load, name='load'),
     url(r'^check/$', views.check, name='check'),

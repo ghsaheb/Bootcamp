@@ -26,6 +26,9 @@ class TestModels(TestCase):
             user=self.user,
             post='A not so long text',
             likes=0,
+# *********************** *********************** *********************** ***********************
+            spams=0,
+# *********************** *********************** *********************** ***********************
             comments=0
         )
         self.question = Question.objects.create(
@@ -216,6 +219,9 @@ class TestModels(TestCase):
             user=self.user,
             post='kjahsdfklahsdlklsdjflakjnzxcvzmncx.vmznxcvlheiruyweihlkdfklajdflk hasldjhalksdfh jklhljk',  # noqa: E501
             likes=0,
+# *********************** *********************** *********************** ***********************
+            spams=0,
+# *********************** *********************** *********************** ***********************
             comments=0
         )
         notification = Notification.objects.create(
