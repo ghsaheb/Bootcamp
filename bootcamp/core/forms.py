@@ -28,6 +28,12 @@ class ProfileForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         max_length=50,
         required=False)
+    birth_date = forms.DateField(
+        widget=forms.SelectDateWidget(
+            years=range(1970, 2020),
+            empty_label=("Choose Year", "Choose Month", "Choose Day"),
+        ),
+        required=False)
 
     class Meta:
         model = User

@@ -19,6 +19,7 @@ class Profile(models.Model):
     location = models.CharField(max_length=50, null=True, blank=True)
     url = models.CharField(max_length=50, null=True, blank=True)
     job_title = models.CharField(max_length=50, null=True, blank=True)
+    birth_date = models.DateField(null=True, blank=True)
 
     class Meta:
         db_table = 'auth_profile'
