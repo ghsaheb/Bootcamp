@@ -231,12 +231,20 @@ def remove(request):
         return HttpResponseBadRequest()
 
 @login_required
+@ajax_required
 def retweet(request):
+    last_feed = request.POST.get('last_feed')
     source_feed_id = request.POST.get('feed')
+    csrf_token = (csrf(request)['csrf_token'])
+    user = request.user
+
     source_feed = Feed.objects.get(pk=source_feed_id)
-    source_feed.retweet(request.user)
-    return HttpResponse()
+    source_feed.retweet(user)
+
+    html = _html_feeds(last_feed, user, csrf_token)
+    return HttpResponse(html)
 
 @login_required
+@ajax_required
 def remove_retweet(request):
     return remove(request)
