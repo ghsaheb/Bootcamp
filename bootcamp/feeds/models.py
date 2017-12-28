@@ -99,6 +99,18 @@ class Feed(models.Model):
 
         return bleach.linkify(escape(self.post))
 
+    def retweet(self, user):
+        if self.is_retweet():
+            return self.get_source_feed().retweet()
+
+        retweet_feed = Feed(user=user, source_feed=self)
+        retweet_feed.save()
+
+        return retweet_feed
+
+    def get_post(self):
+        return self.get_source_feed().post
+
     def is_retweet(self):
         return self.source_feed is not None
 
