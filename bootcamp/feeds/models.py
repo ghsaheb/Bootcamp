@@ -101,7 +101,7 @@ class Feed(models.Model):
 
     def retweet(self, user):
         if self.is_retweet():
-            return self.get_source_feed().retweet()
+            return self.get_source_feed().retweet(user)
 
         retweet_feed = Feed(user=user, source_feed=self)
         retweet_feed.save()
