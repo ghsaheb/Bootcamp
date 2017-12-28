@@ -108,9 +108,6 @@ class Feed(models.Model):
 
         return retweet_feed
 
-    def get_post(self):
-        return self.get_source_feed().post
-
     def is_retweet(self):
         return self.source_feed is not None
 
@@ -119,3 +116,21 @@ class Feed(models.Model):
             return self.source_feed.get_source_feed()
 
         return self
+
+    def get_post(self):
+        if self.is_retweet():
+            return self.get_source_feed().get_post()
+
+        return self.post
+
+    def get_likes_count(self):
+        if self.is_retweet():
+            return self.get_source_feed().get_likes_count()
+
+        return self.likes
+
+    def get_comments_count(self):
+        if self.is_retweet():
+            return self.get_source_feed().get_comments_count()
+
+        return self.comments

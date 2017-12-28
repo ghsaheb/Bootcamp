@@ -15,18 +15,18 @@
           <a href="#" style="text-decoration: none;" class="like unlike">
             <span class="glyphicon glyphicon-thumbs-up"></span>
             <span class="text">{% trans 'Unlike' %}</span>
-            (<span class="like-count">{{ feed.likes }}</span>)
+            (<span class="like-count">{{ feed.get_likes_count }}</span>)
           </a>
         {% else %}
           <a href="#" style="text-decoration: none;" class="like">
             <span class="glyphicon glyphicon-thumbs-up"></span>
             <span class="text">{% trans 'Like' %}</span>
-            (<span class="like-count">{{ feed.likes }}</span>)
+            (<span class="like-count">{{ feed.get_likes_count }}</span>)
           </a>
         {% endif %}
         <a href="#" style="text-decoration: none;" class="comment">
           <span class="glyphicon glyphicon-comment"></span> {% trans 'Comment' %}
-          (<span class="comment-count">{{ feed.comments }}</span>)
+          (<span class="comment-count">{{ feed.get_comments_count }}</span>)
         </a>
       </div>
       <div class="comments">
