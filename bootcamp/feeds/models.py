@@ -18,6 +18,7 @@ class Feed(models.Model):
     parent = models.ForeignKey('Feed', null=True, blank=True)
     likes = models.IntegerField(default=0)
     comments = models.IntegerField(default=0)
+    source_feed = models.ForeignKey('Feed', null=True, blank=True, related_name='retweet_source_feed')
 
     class Meta:
         verbose_name = _('Feed')
@@ -76,3 +77,6 @@ class Feed(models.Model):
 
     def linkfy_post(self):
         return bleach.linkify(escape(self.post))
+
+    def is_retweet(self):
+        return self.source_feed is not None
