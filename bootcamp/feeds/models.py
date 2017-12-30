@@ -9,6 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 import bleach
 from bootcamp.activities.models import Activity
 
+
 @python_2_unicode_compatible
 class Feed(models.Model):
     user = models.ForeignKey(User)
@@ -17,7 +18,7 @@ class Feed(models.Model):
     parent = models.ForeignKey('Feed', null=True, blank=True)
     likes = models.IntegerField(default=0)
     comments = models.IntegerField(default=0)
-    retweeters = models.ManyToManyField(User, through='Retweet', related_name='Retweets')
+    source_feed = models.ForeignKey('Feed', null=True, blank=True, related_name='retweet_source_feed')
 
     class Meta:
         verbose_name = _('Feed')
@@ -25,6 +26,9 @@ class Feed(models.Model):
         ordering = ('-date',)
 
     def __str__(self):
+        if self.is_retweet():
+            return self.get_source_feed().__str__()
+
         return self.post
 
     @staticmethod
@@ -41,9 +45,15 @@ class Feed(models.Model):
         return feeds
 
     def get_comments(self):
+        if self.is_retweet():
+            return self.get_source_feed().get_comments()
+
         return Feed.objects.filter(parent=self).order_by('date')
 
     def calculate_likes(self):
+        if self.is_retweet():
+            return self.get_source_feed().calculate_likes()
+
         likes = Activity.objects.filter(activity_type=Activity.LIKE,
                                         feed=self.pk).count()
         self.likes = likes
@@ -51,6 +61,9 @@ class Feed(models.Model):
         return self.likes
 
     def get_likes(self):
+        if self.is_retweet():
+            return self.get_source_feed().get_likes()
+
         likes = Activity.objects.filter(activity_type=Activity.LIKE,
                                         feed=self.pk)
         return likes
@@ -63,11 +76,17 @@ class Feed(models.Model):
         return likers
 
     def calculate_comments(self):
+        if self.is_retweet():
+            return self.get_source_feed().calculate_comments()
+
         self.comments = Feed.objects.filter(parent=self).count()
         self.save()
         return self.comments
 
     def comment(self, user, post):
+        if self.is_retweet():
+            return self.get_source_feed().comment(user, post)
+
         feed_comment = Feed(user=user, post=post, parent=self)
         feed_comment.save()
         self.comments = Feed.objects.filter(parent=self).count()
@@ -75,31 +94,43 @@ class Feed(models.Model):
         return feed_comment
 
     def linkfy_post(self):
+        if self.is_retweet():
+            return self.get_source_feed().linkfy_post()
+
         return bleach.linkify(escape(self.post))
 
     def retweet(self, user):
-        if self.user == user:
-            raise Exception("Feed owner cannot retweet it's feed.")
-        if Retweet.objects.filter(user__id=user.id, feed__id=self.id).count() > 0:
-            raise Exception("User already retweetted current feed.")
-        ret = Retweet()
-        ret.user = user
-        ret.feed = self
-        ret.save()
+        if self.is_retweet():
+            return self.get_source_feed().retweet(user)
 
-    def remove_retweet(self, user):
-        if self.user == user:
-            raise Exception("Invalid action.")
-        if Retweet.objects.filter(user__id=user.id, feed__id=self.id).count() == 0:
-            raise Exception("User didn't retweetted current feed before.")
-        Retweet.objects.filter(user__id=user.id, feed__id=self.id).delete()
+        retweet_feed = Feed(user=user, source_feed=self)
+        retweet_feed.save()
 
-class Retweet(models.Model):
-    user = models.ForeignKey(User)
-    date = models.DateTimeField(auto_now_add=True)
-    feed = models.ForeignKey(Feed)
+        return retweet_feed
 
-    class Meta:
-        verbose_name = _('Retweet')
-        verbose_name_plural = _('Retweets')
-        ordering = ('-date',)
+    def is_retweet(self):
+        return self.source_feed is not None
+
+    def get_source_feed(self):
+        if self.is_retweet():
+            return self.source_feed.get_source_feed()
+
+        return self
+
+    def get_post(self):
+        if self.is_retweet():
+            return self.get_source_feed().get_post()
+
+        return self.post
+
+    def get_likes_count(self):
+        if self.is_retweet():
+            return self.get_source_feed().get_likes_count()
+
+        return self.likes
+
+    def get_comments_count(self):
+        if self.is_retweet():
+            return self.get_source_feed().get_comments_count()
+
+        return self.comments

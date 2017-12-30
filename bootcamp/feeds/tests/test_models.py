@@ -33,17 +33,10 @@ class TestModels(TestCase):
             likes=0,
             comments=0
         )
-        self.feed3 = Feed.objects.create(
-            user=self.user,
-            post='Feed3 text',
-            likes=0,
-            comments=0
-        )
 
         self.feed.comment(self.other_user, 'my comment')
 
-        self.feed.retweet(self.other_user)
-        self.feed2.retweet(self.other_user)
+        self.retweet = self.feed.retweet(self.other_user)
 
         like = Activity(activity_type=Activity.LIKE, feed=self.feed.id, user=self.other_user)
         like.save()
@@ -69,38 +62,17 @@ class TestModels(TestCase):
         self.assertTrue(self.feed in feeds)
         self.assertTrue(self.feed2 in feeds)
 
-    def test_retweet_mustHaveOneRetweeter(self):
-        self.assertEquals(1, self.feed.retweeters.count())
-        self.assertEquals(self.other_user, self.feed.retweeters.first())
+    def test_retweet(self):
+        feeds = Feed.get_feeds()
+        self.assertEquals(len(feeds), 3)
+        self.assertTrue(self.retweet.is_retweet())
+        self.assertEquals(self.feed, self.retweet.source_feed)
 
-    def test_retweet_userCannotRetweetItsFeedException(self):
-        try:
-            self.feed.retweet(self.user)
-            self.fail()
-        except Exception:
-            pass
+    def test_getLikesCountOnRetweetFeed(self):
+        self.assertEquals(self.feed.likes, self.retweet.get_likes_count())
 
-    def test_retweet_alreadyRetweetted(self):
-        try:
-            self.feed.retweet(self.other_user)
-            self.fail()
-        except Exception:
-            pass
+    def test_getCommentsCountOnRetweetFeed(self):
+        self.assertEquals(self.feed.comments, self.retweet.get_comments_count())
 
-    def test_removeRetweet_userCannotRemoveRetweetOfItsFeed(self):
-        try:
-            self.feed.remove_retweet(self.user)
-            self.fail()
-        except Exception:
-            pass
-
-    def test_removeRetweet_didNotRetweetedBeforeException(self):
-        try:
-            self.feed3.remove_retweet(self.other_user)
-            self.fail()
-        except Exception:
-            pass
-
-    def test_removeRetweet_retweetersMustBeEmpty(self):
-        self.feed2.remove_retweet(self.other_user)
-        self.assertEquals(0, self.feed2.retweeters.count())
+    def test_getPostOnRetweetFeed(self):
+        self.assertEquals(self.feed.post, self.retweet.get_post())

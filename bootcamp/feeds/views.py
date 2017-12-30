@@ -10,25 +10,14 @@ from django.template.loader import render_to_string
 
 from bootcamp.activities.models import Activity
 from bootcamp.decorators import ajax_required
-from bootcamp.feeds.models import Feed, Retweet
+from bootcamp.feeds.models import Feed
 
 FEEDS_NUM_PAGES = 10
 
 
 @login_required
 def feeds(request):
-    all_feeds = []
-    for feed in Feed.get_feeds():
-        all_feeds.append(feed)
-
-    for ret in Retweet.objects.iterator():
-        retweetted_feed = ret.feed
-        retweetted_feed.owner = ret.user
-        retweetted_feed.date = ret.date
-        retweetted_feed.is_retweetted_feed = True
-        all_feeds.append(retweetted_feed)
-
-    all_feeds.sort(key=lambda x: x.date, reverse=True)
+    all_feeds = Feed.get_feeds()
     paginator = Paginator(all_feeds, FEEDS_NUM_PAGES)
     feeds = paginator.page(1)
     from_feed = -1
@@ -144,16 +133,16 @@ def post(request):
 @ajax_required
 def like(request):
     feed_id = request.POST['feed']
-    feed = Feed.objects.get(pk=feed_id)
+    feed = Feed.objects.get(pk=feed_id).get_source_feed()
     user = request.user
-    like = Activity.objects.filter(activity_type=Activity.LIKE, feed=feed_id,
+    like = Activity.objects.filter(activity_type=Activity.LIKE, feed=feed.id,
                                    user=user)
     if like:
         user.profile.unotify_liked(feed)
         like.delete()
 
     else:
-        like = Activity(activity_type=Activity.LIKE, feed=feed_id, user=user)
+        like = Activity(activity_type=Activity.LIKE, feed=feed.id, user=user)
         like.save()
         user.profile.notify_liked(feed)
 
@@ -165,7 +154,7 @@ def like(request):
 def comment(request):
     if request.method == 'POST':
         feed_id = request.POST['feed']
-        feed = Feed.objects.get(pk=feed_id)
+        feed = Feed.objects.get(pk=feed_id).get_source_feed()
         post = request.POST['post']
         post = post.strip()
         if len(post) > 0:
@@ -180,7 +169,7 @@ def comment(request):
 
     else:
         feed_id = request.GET.get('feed')
-        feed = Feed.objects.get(pk=feed_id)
+        feed = Feed.objects.get(pk=feed_id).get_source_feed()
         return render(request, 'feeds/partial_feed_comments.html',
                       {'feed': feed})
 
@@ -197,7 +186,7 @@ def update(request):
 
     dump = {}
     for feed in feeds:
-        dump[feed.pk] = {'likes': feed.likes, 'comments': feed.comments}
+        dump[feed.pk] = {'likes': feed.get_likes_count(), 'comments': feed.get_comments_count()}
 
     data = json.dumps(dump)
     return HttpResponse(data, content_type='application/json')
@@ -207,7 +196,7 @@ def update(request):
 @ajax_required
 def track_comments(request):
     feed_id = request.GET.get('feed')
-    feed = Feed.objects.get(pk=feed_id)
+    feed = Feed.objects.get(pk=feed_id).get_source_feed()
     if len(feed.get_comments()) > 0:
         return render(
             request, 'feeds/partial_feed_comments.html', {'feed': feed})
@@ -223,10 +212,11 @@ def remove(request):
         feed_id = request.POST.get('feed')
         feed = Feed.objects.get(pk=feed_id)
         if feed.user == request.user:
-            likes = feed.get_likes()
             parent = feed.parent
-            for like in likes:
-                like.delete()
+            if not feed.is_retweet():
+                likes = feed.get_likes()
+                for like in likes:
+                    like.delete()
 
             feed.delete()
             if parent:
@@ -241,21 +231,20 @@ def remove(request):
         return HttpResponseBadRequest()
 
 @login_required
+@ajax_required
 def retweet(request):
-    try:
-        feed_id = request.GET.get('feed')
-        feed = Feed.objects.get(pk=feed_id)
-        feed.retweet(request.user)
-        return HttpResponse()
-    except Exception:
-        return HttpResponseBadRequest()
+    last_feed = request.POST.get('last_feed')
+    source_feed_id = request.POST.get('feed')
+    csrf_token = (csrf(request)['csrf_token'])
+    user = request.user
+
+    source_feed = Feed.objects.get(pk=source_feed_id)
+    source_feed.retweet(user)
+
+    html = _html_feeds(last_feed, user, csrf_token)
+    return HttpResponse(html)
 
 @login_required
+@ajax_required
 def remove_retweet(request):
-    try:
-        feed_id = request.GET.get('feed')
-        feed = Feed.objects.get(pk=feed_id)
-        feed.remove_retweet(request.user)
-        return HttpResponse()
-    except Exception:
-        return HttpResponseBadRequest()
+    return remove(request)
