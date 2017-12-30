@@ -76,3 +76,8 @@ class TestModels(TestCase):
 
     def test_getPostOnRetweetFeed(self):
         self.assertEquals(self.feed.post, self.retweet.get_post())
+
+    def test_getRetweetsCount(self):
+        self.assertEquals(self.feed.get_retweets_count(), 1)
+        self.assertEquals(self.feed2.get_retweets_count(), 0)
+        self.assertEquals(self.retweet.get_retweets_count(), 1)

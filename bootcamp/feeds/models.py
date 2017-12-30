@@ -136,5 +136,7 @@ class Feed(models.Model):
         return self.comments
 
     def get_retweets_count(self):
+        if self.is_retweet():
+            return self.get_source_feed().get_comments_count()
 
-        return 5
+        return Feed.objects.filter(source_feed=self).count()
