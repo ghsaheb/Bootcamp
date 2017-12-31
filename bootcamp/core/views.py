@@ -95,6 +95,7 @@ def settings(request):
             user.first_name = form.cleaned_data.get('first_name')
             user.last_name = form.cleaned_data.get('last_name')
             user.profile.job_title = form.cleaned_data.get('job_title')
+            user.profile.birth_date = form.cleaned_data.get('birth_date')
             user.email = form.cleaned_data.get('email')
             user.profile.url = form.cleaned_data.get('url')
             user.profile.location = form.cleaned_data.get('location')
@@ -106,6 +107,7 @@ def settings(request):
     else:
         form = ProfileForm(instance=user, initial={
             'job_title': user.profile.job_title,
+            'birth_date': user.profile.birth_date,
             'url': user.profile.url,
             'location': user.profile.location
             })

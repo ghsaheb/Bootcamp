@@ -33,6 +33,9 @@
               {% if user.profile.url %}
                 <p><strong>{% trans 'Url' %}:</strong> {{ user.profile.get_url }}</p>
               {% endif %}
+              {% if user.profile.birth_date %}
+                <p><strong>{% trans 'Birth_Date' %}:</strong> {{ user.profile.birth_date }}</p>
+              {% endif %}
             </div>
           </div>
         </div>
