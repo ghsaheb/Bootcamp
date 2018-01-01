@@ -26,7 +26,6 @@
           </a>
         {% endif %}
 
-{#      **************** **************** **************** ****************       #}
         {% if user in feed.get_spammers %}
           <a href="#" style="text-decoration: none;" class="spam unspam">
             <span class="text">{% trans 'Unspam' %}</span>
@@ -38,7 +37,6 @@
             (<span class="spam-count">{{ feed.spams }}</span>)
           </a>
         {% endif %}
-{#      **************** **************** **************** ****************       #}
 
         <a href="#" style="text-decoration: none;" class="comment">
           <span class="glyphicon glyphicon-comment"></span> {% trans 'Comment' %}

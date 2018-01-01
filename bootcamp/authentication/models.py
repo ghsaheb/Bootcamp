@@ -73,7 +73,6 @@ class Profile(models.Model):
                                         from_user=self.user, to_user=feed.user,
                                         feed=feed).delete()
 
-# *********************** *********************** *********************** ***********************
     def notify_spamed(self, feed):
         if self.user != feed.user:
             Notification(notification_type=Notification.SPAMED,
@@ -85,7 +84,6 @@ class Profile(models.Model):
             Notification.objects.filter(notification_type=Notification.SPAMED,
                                         from_user=self.user, to_user=feed.user,
                                         feed=feed).delete()
-# *********************** *********************** *********************** ***********************
 
     def notify_commented(self, feed):
         if self.user != feed.user:

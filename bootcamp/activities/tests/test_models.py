@@ -26,9 +26,7 @@ class TestModels(TestCase):
             user=self.user,
             post='A not so long text',
             likes=0,
-# *********************** *********************** *********************** ***********************
             spams=0,
-# *********************** *********************** *********************** ***********************
             comments=0
         )
         self.question = Question.objects.create(
@@ -77,6 +75,14 @@ class TestModels(TestCase):
         )
         self.assertTrue(isinstance(activity, Activity))
         self.assertEqual(str(activity), 'L')
+
+    def test_register_spam_activity(self):
+        activity = Activity.objects.create(
+            user=self.user,
+            activity_type='S'
+        )
+        self.assertTrue(isinstance(activity, Activity))
+        self.assertEqual(str(activity), 'S')
 
     def test_activity_daily_statistic(self):
         activity_one = Activity.objects.create(
@@ -133,6 +139,21 @@ class TestModels(TestCase):
         self.assertTrue(isinstance(notification, Notification))
         self.assertEqual(str(notification), test_string)
         self.assertNotEqual(str(notification), 'l')
+
+    def test_register_spam_notification(self):
+        notification = Notification.objects.create(
+            from_user=self.user,
+            to_user=self.other_user,
+            feed=self.feed,
+            notification_type='S',
+            is_read=False
+        )
+        test_string = notification._SPAMED_TEMPLATE.format(
+            self.user.username, self.user.profile.get_screen_name(),
+            self.feed.pk, notification.get_summary(self.feed.post))
+        self.assertTrue(isinstance(notification, Notification))
+        self.assertEqual(str(notification), test_string)
+        self.assertNotEqual(str(notification), 's')
 
     def test_register_comm_notification(self):
         notification = Notification.objects.create(
@@ -219,9 +240,7 @@ class TestModels(TestCase):
             user=self.user,
             post='kjahsdfklahsdlklsdjflakjnzxcvzmncx.vmznxcvlheiruyweihlkdfklajdflk hasldjhalksdfh jklhljk',  # noqa: E501
             likes=0,
-# *********************** *********************** *********************** ***********************
             spams=0,
-# *********************** *********************** *********************** ***********************
             comments=0
         )
         notification = Notification.objects.create(

@@ -17,9 +17,7 @@ class Feed(models.Model):
     post = models.TextField(max_length=255)
     parent = models.ForeignKey('Feed', null=True, blank=True)
     likes = models.IntegerField(default=0)
-# *************************** *************************** ***************************
     spams = models.IntegerField(default=0)
-# *************************** *************************** ***************************
     comments = models.IntegerField(default=0)
 
     class Meta:
@@ -30,26 +28,18 @@ class Feed(models.Model):
     def __str__(self):
         return self.post
 
-# **************** **************** **************** **************** **************** ****************
     @staticmethod
     def get_feeds(from_feed=None):
         if from_feed is not None:
-#           feeds = Feed.objects.filter(parent=None, id__lte=from_feed)
             feeds = Feed.objects.filter(parent=None, id__lte=from_feed, spams__lt=5)
         else:
-#           feeds = Feed.objects.filter(parent=None)
             feeds = Feed.objects.filter(parent=None, spams__lt=5)
         return feeds
-# **************** **************** **************** **************** **************** ****************
 
-# **************** **************** **************** **************** **************** ****************
     @staticmethod
     def get_feeds_after(feed):
-#       feeds = Feed.objects.filter(parent=None, id__gt=feed)
         feeds = Feed.objects.filter(parent=None, id__gt=feed, spams__lt=5)
         return feeds
-# **************** **************** **************** **************** **************** ****************
-
 
     def get_comments(self):
         return Feed.objects.filter(parent=self).order_by('date')
@@ -73,7 +63,6 @@ class Feed(models.Model):
             likers.append(like.user)
         return likers
 
-# *************************** *************************** ***************************
     def calculate_spams(self):
         spams = Activity.objects.filter(activity_type=Activity.SPAM,
                                         feed=self.pk).count()
@@ -92,7 +81,6 @@ class Feed(models.Model):
         for spam in spams:
             spammers.append(spam.user)
         return spammers
-# *************************** *************************** ***************************
 
     def calculate_comments(self):
         self.comments = Feed.objects.filter(parent=self).count()

@@ -148,7 +148,6 @@ def like(request):
 
     return HttpResponse(feed.calculate_likes())
 
-# ********************************* ********************************* *********************************
 @login_required
 @ajax_required
 def spam(request):
@@ -167,7 +166,6 @@ def spam(request):
         user.profile.notify_spamed(feed)
 
     return HttpResponse(feed.calculate_spams())
-# ********************************* ********************************* *********************************
 
 @login_required
 @ajax_required
@@ -206,10 +204,7 @@ def update(request):
 
     dump = {}
     for feed in feeds:
-#        dump[feed.pk] = {'likes': feed.likes, 'comments': feed.comments}
-#   ********************* ********************* ********************* ********************* *********************
         dump[feed.pk] = {'likes': feed.likes, 'spams': feed.spams, 'comments': feed.comments}
-#   ********************* ********************* ********************* ********************* *********************
     data = json.dumps(dump)
     return HttpResponse(data, content_type='application/json')
 
@@ -235,16 +230,12 @@ def remove(request):
         feed = Feed.objects.get(pk=feed_id)
         if feed.user == request.user:
             likes = feed.get_likes()
-# ************************ ************************ ************************ ************************
             spams = feed.get_spams()
-# ************************ ************************ ************************ ************************
             parent = feed.parent
             for like in likes:
                 like.delete()
-# ************************ ************************ ************************ ************************
             for spam in spams:
                 spam.delete()
-# ************************ ************************ ************************ ************************
             feed.delete()
             if parent:
                 parent.calculate_comments()
