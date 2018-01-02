@@ -14,13 +14,11 @@ from django.utils.html import escape
 class Activity(models.Model):
     FAVORITE = 'F'
     LIKE = 'L'
-    SPAM = 'S'
     UP_VOTE = 'U'
     DOWN_VOTE = 'D'
     ACTIVITY_TYPES = (
         (FAVORITE, 'Favorite'),
         (LIKE, 'Like'),
-        (SPAM, 'Spam'),
         (UP_VOTE, 'Up Vote'),
         (DOWN_VOTE, 'Down Vote'),
         )
@@ -90,7 +88,6 @@ class Activity(models.Model):
 @python_2_unicode_compatible
 class Notification(models.Model):
     LIKED = 'L'
-    SPAMED = 'S'
     COMMENTED = 'C'
     FAVORITED = 'F'
     ANSWERED = 'A'
@@ -99,7 +96,6 @@ class Notification(models.Model):
     ALSO_COMMENTED = 'S'
     NOTIFICATION_TYPES = (
         (LIKED, 'Liked'),
-        (SPAMED, 'Spamed'),
         (COMMENTED, 'Commented'),
         (FAVORITED, 'Favorited'),
         (ANSWERED, 'Answered'),
@@ -109,7 +105,6 @@ class Notification(models.Model):
         )
 
     _LIKED_TEMPLATE = '<a href="/{0}/">{1}</a> liked your post: <a href="/feeds/{2}/">{3}</a>'  # noqa: E501
-    _SPAMED_TEMPLATE = '<a href="/{0}/">{1}</a> spamed your post: <a href="/feeds/{2}/">{3}</a>'  # noqa: E501
     _COMMENTED_TEMPLATE = '<a href="/{0}/">{1}</a> commented on your post: <a href="/feeds/{2}/">{3}</a>'  # noqa: E501
     _FAVORITED_TEMPLATE = '<a href="/{0}/">{1}</a> favorited your question: <a href="/questions/{2}/">{3}</a>'  # noqa: E501
     _ANSWERED_TEMPLATE = '<a href="/{0}/">{1}</a> answered your question: <a href="/questions/{2}/">{3}</a>'  # noqa: E501
@@ -136,13 +131,6 @@ class Notification(models.Model):
     def __str__(self):
         if self.notification_type == self.LIKED:
             return self._LIKED_TEMPLATE.format(
-                escape(self.from_user.username),
-                escape(self.from_user.profile.get_screen_name()),
-                self.feed.pk,
-                escape(self.get_summary(self.feed.post))
-                )
-        elif self.notification_type == self.SPAMED:
-            return self._SPAMED_TEMPLATE.format(
                 escape(self.from_user.username),
                 escape(self.from_user.profile.get_screen_name()),
                 self.feed.pk,

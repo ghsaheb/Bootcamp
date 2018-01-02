@@ -46,14 +46,12 @@ class TestViews(TestCase):
             user=self.user,
             post='This is a feed',
             likes=0,
-            spams=0,
             comments=0)
 
         self.feed_2 = Feed.objects.create(
             user=self.other_user,
             post='This is another feed',
             likes=0,
-            spams=0,
             comments=0)
 
         self.question_one = Question.objects.create(

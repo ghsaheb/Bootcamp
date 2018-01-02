@@ -32,13 +32,11 @@ class TestViews(TestCase):
             user=self.user,
             post='A not so long text',
             likes=0,
-            spams=0,
             comments=0)
         self.feed_2 = Feed.objects.create(
             user=self.user,
             post='A not so long text 2',
             likes=0,
-            spams=0,
             comments=0)
         self.comment_text = 'my_comment'
         self.feed_2.comment(user=self.user, post=self.comment_text)

@@ -169,7 +169,7 @@ def upload_picture(request):
 
         return redirect('/settings/picture/?upload_picture=uploaded')
 
-    except Exception:
+    except Exception as e:
         return redirect('/settings/picture/')
 
 
