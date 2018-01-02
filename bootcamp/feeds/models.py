@@ -17,7 +17,6 @@ class Feed(models.Model):
     post = models.TextField(max_length=255)
     parent = models.ForeignKey('Feed', null=True, blank=True)
     likes = models.IntegerField(default=0)
-    spams = models.IntegerField(default=0)
     comments = models.IntegerField(default=0)
 
     class Meta:
@@ -31,14 +30,14 @@ class Feed(models.Model):
     @staticmethod
     def get_feeds(from_feed=None):
         if from_feed is not None:
-            feeds = Feed.objects.filter(parent=None, id__lte=from_feed, spams__lt=5)
+            feeds = Feed.objects.filter(parent=None, id__lte=from_feed)
         else:
-            feeds = Feed.objects.filter(parent=None, spams__lt=5)
+            feeds = Feed.objects.filter(parent=None)
         return feeds
 
     @staticmethod
     def get_feeds_after(feed):
-        feeds = Feed.objects.filter(parent=None, id__gt=feed, spams__lt=5)
+        feeds = Feed.objects.filter(parent=None, id__gt=feed)
         return feeds
 
     def get_comments(self):
@@ -62,25 +61,6 @@ class Feed(models.Model):
         for like in likes:
             likers.append(like.user)
         return likers
-
-    def calculate_spams(self):
-        spams = Activity.objects.filter(activity_type=Activity.SPAM,
-                                        feed=self.pk).count()
-        self.spams = spams
-        self.save()
-        return self.spams
-
-    def get_spams(self):
-        spams = Activity.objects.filter(activity_type=Activity.SPAM,
-                                        feed=self.pk)
-        return spams
-
-    def get_spammers(self):
-        spams = self.get_spams()
-        spammers = []
-        for spam in spams:
-            spammers.append(spam.user)
-        return spammers
 
     def calculate_comments(self):
         self.comments = Feed.objects.filter(parent=self).count()

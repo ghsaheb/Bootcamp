@@ -24,14 +24,13 @@ class TestModels(TestCase):
             user=self.user,
             post='A not so long text',
             likes=0,
-            spams=0,
             comments=0
         )
+
         self.feed2 = Feed.objects.create(
             user=self.user,
             post='Another text',
             likes=0,
-            spams=0,
             comments=0
         )
 
@@ -40,11 +39,6 @@ class TestModels(TestCase):
         like = Activity(activity_type=Activity.LIKE, feed=self.feed.id, user=self.other_user)
         like.save()
         self.user.profile.notify_liked(self.feed)
-
-        spam = Activity(activity_type=Activity.SPAM, feed=self.feed.id, user=self.other_user)
-        spam.save()
-        self.user.profile.notify_spamed(self.feed)
-
 
     def test_instance_values(self):
         self.assertTrue(isinstance(self.feed, Feed))
@@ -59,11 +53,6 @@ class TestModels(TestCase):
         likers = self.feed.get_likers()
         self.assertEquals(len(likers), 1)
         self.assertEquals(likers[0], self.other_user)
-
-    def test_getSpamers(self):
-        spamers = self.feed.get_spammers()
-        self.assertEquals(len(spamers), 1)
-        self.assertEquals(spamers[0], self.other_user)
 
     def test_getFeeds_withFromFeed1(self):
         feeds = Feed.get_feeds(self.feed2.id)
