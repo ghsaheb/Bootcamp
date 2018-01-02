@@ -36,6 +36,8 @@ class TestModels(TestCase):
 
         self.feed.comment(self.other_user, 'my comment')
 
+        self.retweet = self.feed.retweet(self.other_user)
+
         like = Activity(activity_type=Activity.LIKE, feed=self.feed.id, user=self.other_user)
         like.save()
         self.user.profile.notify_liked(self.feed)
@@ -60,3 +62,22 @@ class TestModels(TestCase):
         self.assertTrue(self.feed in feeds)
         self.assertTrue(self.feed2 in feeds)
 
+    def test_retweet(self):
+        feeds = Feed.get_feeds()
+        self.assertEquals(len(feeds), 3)
+        self.assertTrue(self.retweet.is_retweet())
+        self.assertEquals(self.feed, self.retweet.source_feed)
+
+    def test_getLikesCountOnRetweetFeed(self):
+        self.assertEquals(self.feed.likes, self.retweet.get_likes_count())
+
+    def test_getCommentsCountOnRetweetFeed(self):
+        self.assertEquals(self.feed.comments, self.retweet.get_comments_count())
+
+    def test_getPostOnRetweetFeed(self):
+        self.assertEquals(self.feed.post, self.retweet.get_post())
+
+    def test_getRetweetsCount(self):
+        self.assertEquals(self.feed.get_retweets_count(), 1)
+        self.assertEquals(self.feed2.get_retweets_count(), 0)
+        self.assertEquals(self.retweet.get_retweets_count(), 1)
