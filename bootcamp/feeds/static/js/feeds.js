@@ -87,6 +87,36 @@ $(function () {
     return false;
   });
 
+// ***************** ***************** ***************** ***************** ***************** *****************
+  $("ul.stream").on("click", ".spam", function () {
+    console.log("JJJJJJ");
+    var li = $(this).closest("li");
+    var feed = $(li).attr("feed-id");
+    var csrf = $(li).attr("csrf");
+    $.ajax({
+      url: '/feeds/spam/',
+      data: {
+        'feed': feed,
+        'csrfmiddlewaretoken': csrf
+      },
+      type: 'post',
+      cache: false,
+      success: function (data) {
+        if ($(".spam", li).hasClass("unspam")) {
+          $(".spam", li).removeClass("unspam");
+          $(".spam .text", li).text("Spam");
+        }
+        else {
+          $(".spam", li).addClass("unspam");
+          $(".spam .text", li).text("Unspam");
+        }
+        $(".spam .spam-count", li).text(data);
+      }
+    });
+    return false;
+  });
+// ***************** ***************** ***************** ***************** ***************** *****************
+
   $("ul.stream").on("click", ".comment", function () { 
     var post = $(this).closest(".post");
     if ($(".comments", post).hasClass("tracking")) {
@@ -236,6 +266,7 @@ $(function () {
           $.each(data, function(id, feed) {
               var li = $("li[feed-id='" + id + "']");
               $(".like-count", li).text(feed.likes);
+              $(".spam-count", li).text(feed.spams);
               $(".comment-count", li).text(feed.comments);
           });
         },

@@ -44,6 +44,7 @@ class TestModels(TestCase):
             user=self.other_user,
             post='A not so long text',
             likes=0,
+            spams=0,
             comments=0
         )
         self.question = Question.objects.create(
@@ -93,6 +94,23 @@ class TestModels(TestCase):
         new_liked_count = Notification.objects.filter(
             notification_type='L').count()
         assert liked_count > new_liked_count
+
+    def test_spamed_notification(self):
+        spamed_count = Notification.objects.filter(
+            notification_type='S').count()
+        self.user.profile.notify_spamed(self.feed)
+        new_spamed_count = Notification.objects.filter(
+            notification_type='S').count()
+        assert spamed_count < new_spamed_count
+
+    def test_unspamed_notification(self):
+        self.user.profile.notify_spamed(self.feed)
+        spamed_count = Notification.objects.filter(
+            notification_type='S').count()
+        self.user.profile.unotify_spamed(self.feed)
+        new_spamed_count = Notification.objects.filter(
+            notification_type='S').count()
+        assert spamed_count > new_spamed_count
 
     def test_commented_notification(self):
         commented_count = Notification.objects.filter(
