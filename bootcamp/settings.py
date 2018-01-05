@@ -38,7 +38,7 @@ INSTALLED_APPS = (
     'bootcamp.messenger',
     'bootcamp.questions',
     'bootcamp.search',
-    'bootcamp.friendship',
+    'friendship',
     'taggit',
 )
 
