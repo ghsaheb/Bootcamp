@@ -1,26 +1,25 @@
-import os
 import json
+import os
 
 from PIL import Image
-
 from django.conf import settings as django_settings
 from django.contrib import messages
-from django.db.models import Q
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from friendship.models import Friend, FriendshipRequest
 
-from bootcamp.core.forms import ChangePasswordForm, ProfileForm
-from bootcamp.feeds.views import FEEDS_NUM_PAGES, feeds
-from bootcamp.feeds.models import Feed
-from bootcamp.articles.models import Article, ArticleComment
-from bootcamp.questions.models import Question, Answer
 from bootcamp.activities.models import Activity
+from bootcamp.articles.models import Article, ArticleComment
+from bootcamp.core.forms import ChangePasswordForm, ProfileForm
+from bootcamp.feeds.models import Feed
+from bootcamp.feeds.views import FEEDS_NUM_PAGES, feeds
 from bootcamp.messenger.models import Message
+from bootcamp.questions.models import Question, Answer
 
-from friendship.models import Friend, Follow, FriendshipRequest, FriendshipManager
 
 def home(request):
     if request.user.is_authenticated():

@@ -129,6 +129,20 @@ class Profile(models.Model):
                 to_user=answer.user,
                 answer=answer).delete()
 
+    def notify_friendship_request(self, friendship_request):
+        if self.user != friendship_request.to_user:
+            Notification(notification_type=Notification.FRIENDSHIP_REQUESTED,
+                         from_user=friendship_request.from_user, to_user=friendship_request.to_user).save()
+
+    def notify_friendship_request_accept(self, friendship_request):
+        if self.user != friendship_request.to_user:
+            Notification(notification_type=Notification.FRIENDSHIP_REQUEST_ACCEPTED,
+                         from_user=friendship_request.to_user, to_user=friendship_request.from_user).save()
+
+    def notify_friendship_request_reject(self, friendship_request):
+        if self.user != friendship_request.to_user:
+            Notification(notification_type=Notification.FRIENDSHIP_REQUEST_REJECTED,
+                         from_user=friendship_request.to_user, to_user=friendship_request.from_user).save()
 
 def create_user_profile(sender, instance, created, **kwargs):
     if created:

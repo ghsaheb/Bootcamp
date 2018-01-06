@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load i18n %}
-{% load friendshiptags %}
 
 {% block title %}{{ page_user.profile.get_screen_name }}{% endblock %}
 
@@ -55,7 +54,7 @@
           <img src="{{ page_user.profile.get_picture }}" class="picture"/>
         {% if is_frienship_request_enabled %}
           <div>
-              <a href="{% url 'friendship_add_friend' page_user.username %}">
+              <a href="/friends/send_request?username={{ page_user.username }}">
                 <span class="glyphicon glyphicon-envelope"></span>
                 Request Friendship
               </a>
@@ -63,7 +62,8 @@
         {% endif %}
         {% if has_friendship_request_from_page_user %}
             <div>
-                <a href="{% url 'friendship_accept' friendship_request_from_page_user.id %}"><span class="glyphicon glyphicon-question-sign"></span> Accept/Reject request</a>
+                <a href="/friends/accept_request?id={{ friendship_request_from_page_user.id }}"><span class="glyphicon glyphicon-thumbs-up"></span> Accept&nbsp</a>
+                <a href="/friends/reject_request?id={{ friendship_request_from_page_user.id }}"><span class="glyphicon glyphicon-thumbs-down"></span> Reject</a>
             </div>
         {% endif %}
         {% if has_friendship_request_to_page_user %}
@@ -75,7 +75,7 @@
         {% if are_friends %}
             <div>
                 <span class="glyphicon glyphicon-heart"></span>
-                <span>You are already friends</span>
+                <span>You are friends</span>
             </div>
         {% endif %}
         <ul>
