@@ -1,24 +1,24 @@
-import os
 import json
+import os
 
 from PIL import Image
-
 from django.conf import settings as django_settings
 from django.contrib import messages
-from django.db.models import Q
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from friendship.models import Friend, FriendshipRequest
 
-from bootcamp.core.forms import ChangePasswordForm, ProfileForm
-from bootcamp.feeds.views import FEEDS_NUM_PAGES, feeds
-from bootcamp.feeds.models import Feed
-from bootcamp.articles.models import Article, ArticleComment
-from bootcamp.questions.models import Question, Answer
 from bootcamp.activities.models import Activity
+from bootcamp.articles.models import Article, ArticleComment
+from bootcamp.core.forms import ChangePasswordForm, ProfileForm
+from bootcamp.feeds.models import Feed
+from bootcamp.feeds.views import FEEDS_NUM_PAGES, feeds
 from bootcamp.messenger.models import Message
+from bootcamp.questions.models import Question, Answer
 
 
 def home(request):
@@ -65,6 +65,17 @@ def profile(request, username):
     messages_count = Message.objects.filter(
         Q(from_user=page_user) | Q(user=page_user)).count()
     data, datepoints = Activity.daily_activity(page_user)
+
+    are_friends = Friend.objects.are_friends(request.user, page_user)
+    has_friendship_request_to_page_user = FriendshipRequest.objects.filter(from_user=request.user, to_user=page_user).count() != 0
+    friendship_request_from_page_user = FriendshipRequest.objects.filter(from_user=page_user, to_user=request.user).first()
+    has_friendship_request_from_page_user = friendship_request_from_page_user is not None
+
+    is_friendship_request_enabled = (request.user != page_user) and \
+            not has_friendship_request_to_page_user and \
+            not has_friendship_request_from_page_user and \
+            not are_friends
+
     data = {
         'page_user': page_user,
         'feeds_count': feeds_count,
@@ -81,7 +92,12 @@ def profile(request, username):
         'line_data': data,
         'feeds': feeds,
         'from_feed': from_feed,
-        'page': 1
+        'page': 1,
+        'is_frienship_request_enabled': is_friendship_request_enabled,
+        'are_friends': are_friends,
+        'has_friendship_request_to_page_user': has_friendship_request_to_page_user,
+        'has_friendship_request_from_page_user': has_friendship_request_from_page_user,
+        'friendship_request_from_page_user': friendship_request_from_page_user
         }
     return render(request, 'core/profile.html', data)
 

@@ -14,14 +14,20 @@ from django.utils.html import escape
 class Activity(models.Model):
     FAVORITE = 'F'
     LIKE = 'L'
+    FRIENDSHIP_REQUEST = 'Q'
+    FRIENDSHIP_REQUEST_ACCEPT = 'A'
+    FRIENDSHIP_REQUEST_REJECT = 'R'
     UP_VOTE = 'U'
     DOWN_VOTE = 'D'
     ACTIVITY_TYPES = (
         (FAVORITE, 'Favorite'),
         (LIKE, 'Like'),
+        (FRIENDSHIP_REQUEST, 'Friendship Request'),
+        (FRIENDSHIP_REQUEST_ACCEPT, 'Friendship Request Accept'),
+        (FRIENDSHIP_REQUEST_REJECT, 'Friendship Request Reject'),
         (UP_VOTE, 'Up Vote'),
         (DOWN_VOTE, 'Down Vote'),
-        )
+    )
 
     user = models.ForeignKey(User)
     activity_type = models.CharField(max_length=1, choices=ACTIVITY_TYPES)
@@ -88,6 +94,9 @@ class Activity(models.Model):
 @python_2_unicode_compatible
 class Notification(models.Model):
     LIKED = 'L'
+    FRIENDSHIP_REQUESTED = 'Q'
+    FRIENDSHIP_REQUEST_ACCEPTED = 'A'
+    FRIENDSHIP_REQUEST_REJECTED = 'R'
     COMMENTED = 'C'
     FAVORITED = 'F'
     ANSWERED = 'A'
@@ -96,6 +105,9 @@ class Notification(models.Model):
     ALSO_COMMENTED = 'S'
     NOTIFICATION_TYPES = (
         (LIKED, 'Liked'),
+        (FRIENDSHIP_REQUESTED, 'Friendship Requested'),
+        (FRIENDSHIP_REQUEST_ACCEPTED, 'Friendship Request Accepted'),
+        (FRIENDSHIP_REQUEST_REJECTED, 'Friendship Request Rejected'),
         (COMMENTED, 'Commented'),
         (FAVORITED, 'Favorited'),
         (ANSWERED, 'Answered'),
@@ -105,6 +117,9 @@ class Notification(models.Model):
         )
 
     _LIKED_TEMPLATE = '<a href="/{0}/">{1}</a> liked your post: <a href="/feeds/{2}/">{3}</a>'  # noqa: E501
+    _FRIENDSHIP_REQUESTED_TEMPLATE = '<a href="/{0}">{0} sent a friend request</a>'  # noqa: E501
+    _FRIENDSHIP_REQUEST_ACCEPTED_TEMPLATE = '<a href="/{0}">{0} accepted your friend request</a>'  # noqa: E501
+    _FRIENDSHIP_REQUEST_REJECTED_TEMPLATE = '<a href="/{0}">{0} rejected your friend request</a>'  # noqa: E501
     _COMMENTED_TEMPLATE = '<a href="/{0}/">{1}</a> commented on your post: <a href="/feeds/{2}/">{3}</a>'  # noqa: E501
     _FAVORITED_TEMPLATE = '<a href="/{0}/">{1}</a> favorited your question: <a href="/questions/{2}/">{3}</a>'  # noqa: E501
     _ANSWERED_TEMPLATE = '<a href="/{0}/">{1}</a> answered your question: <a href="/questions/{2}/">{3}</a>'  # noqa: E501
@@ -135,6 +150,18 @@ class Notification(models.Model):
                 escape(self.from_user.profile.get_screen_name()),
                 self.feed.pk,
                 escape(self.get_summary(self.feed.post))
+                )
+        elif self.notification_type == self.FRIENDSHIP_REQUESTED:
+            return self._FRIENDSHIP_REQUESTED_TEMPLATE.format(
+                escape(self.from_user.username)
+                )
+        elif self.notification_type == self.FRIENDSHIP_REQUEST_ACCEPTED:
+            return self._FRIENDSHIP_REQUEST_ACCEPTED_TEMPLATE.format(
+                escape(self.from_user.username)
+                )
+        elif self.notification_type == self.FRIENDSHIP_REQUEST_REJECTED:
+            return self._FRIENDSHIP_REQUEST_REJECTED_TEMPLATE.format(
+                escape(self.from_user.username)
                 )
         elif self.notification_type == self.COMMENTED:
             return self._COMMENTED_TEMPLATE.format(
