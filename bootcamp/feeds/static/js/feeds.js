@@ -69,7 +69,6 @@ $(function () {
       data: {
         'feed': feed,
         'csrfmiddlewaretoken': csrf
-
       },
       type: 'post',
       cache: false,
@@ -87,6 +86,36 @@ $(function () {
     });
     return false;
   });
+
+// ***************** ***************** ***************** ***************** ***************** *****************
+  $("ul.stream").on("click", ".spam", function () {
+    console.log("JJJJJJ");
+    var li = $(this).closest("li");
+    var feed = $(li).attr("feed-id");
+    var csrf = $(li).attr("csrf");
+    $.ajax({
+      url: '/feeds/spam/',
+      data: {
+        'feed': feed,
+        'csrfmiddlewaretoken': csrf
+      },
+      type: 'post',
+      cache: false,
+      success: function (data) {
+        if ($(".spam", li).hasClass("unspam")) {
+          $(".spam", li).removeClass("unspam");
+          $(".spam .text", li).text("Spam");
+        }
+        else {
+          $(".spam", li).addClass("unspam");
+          $(".spam .text", li).text("Unspam");
+        }
+        $(".spam .spam-count", li).text(data);
+      }
+    });
+    return false;
+  });
+// ***************** ***************** ***************** ***************** ***************** *****************
 
   $("ul.stream").on("click", ".retweet", function () {
     var last_feed = $(".stream li:first-child").attr("feed-id");

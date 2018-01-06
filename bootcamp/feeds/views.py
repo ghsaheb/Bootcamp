@@ -148,6 +148,24 @@ def like(request):
 
     return HttpResponse(feed.calculate_likes())
 
+@login_required
+@ajax_required
+def spam(request):
+    feed_id = request.POST['feed']
+    feed = Feed.objects.get(pk=feed_id).get_source_feed()
+    user = request.user
+    spam = Activity.objects.filter(activity_type=Activity.SPAM, feed=feed.id,
+                                   user=user)
+    if spam:
+        user.profile.unotify_spamed(feed)
+        spam.delete()
+
+    else:
+        spam = Activity(activity_type=Activity.SPAM, feed=feed.id, user=user)
+        spam.save()
+        user.profile.notify_spamed(feed)
+
+    return HttpResponse(feed.calculate_spams())
 
 @login_required
 @ajax_required
@@ -186,7 +204,7 @@ def update(request):
 
     dump = {}
     for feed in feeds:
-        dump[feed.pk] = {'likes': feed.get_likes_count(), 'comments': feed.get_comments_count()}
+        dump[feed.pk] = {'likes': feed.get_likes_count(), 'spams': feed.get_spams_count(), 'comments': feed.get_comments_count()}
 
     data = json.dumps(dump)
     return HttpResponse(data, content_type='application/json')
@@ -215,9 +233,11 @@ def remove(request):
             parent = feed.parent
             if not feed.is_retweet():
                 likes = feed.get_likes()
+                spams = feed.get_spams()
                 for like in likes:
                     like.delete()
-
+                for spam in spams:
+                    spam.delete()
             feed.delete()
             if parent:
                 parent.calculate_comments()
