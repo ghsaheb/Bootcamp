@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load i18n %}
+{% load friendshiptags %}
 
 {% block title %}{{ page_user.profile.get_screen_name }}{% endblock %}
 
@@ -51,7 +52,32 @@
     <div class="row">
       <!--Profile tile-->
       <div class="col-md-3 user-profile">
-        <img src="{{ page_user.profile.get_picture }}" class="picture">
+          <img src="{{ page_user.profile.get_picture }}" class="picture"/>
+        {% if is_frienship_request_enabled %}
+          <div>
+              <a href="{% url 'friendship_add_friend' page_user.username %}">
+                <span class="glyphicon glyphicon-envelope"></span>
+                Request Friendship
+              </a>
+          </div>
+        {% endif %}
+        {% if has_friendship_request_from_page_user %}
+            <div>
+                <a href="{% url 'friendship_accept' friendship_request_from_page_user.id %}"><span class="glyphicon glyphicon-question-sign"></span> Accept/Reject request</a>
+            </div>
+        {% endif %}
+        {% if has_friendship_request_to_page_user %}
+            <div>
+                <span class="glyphicon glyphicon-hourglass"></span>
+                <span>You have pending friendship request</span>
+            </div>
+        {% endif %}
+        {% if are_friends %}
+            <div>
+                <span class="glyphicon glyphicon-heart"></span>
+                <span>You are already friends</span>
+            </div>
+        {% endif %}
         <ul>
           {% if page_user.profile.job_title %}
             <li><span class="glyphicon glyphicon-briefcase"></span> {{ page_user.profile.job_title }}</li>

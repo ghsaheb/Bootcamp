@@ -20,6 +20,7 @@ from bootcamp.questions.models import Question, Answer
 from bootcamp.activities.models import Activity
 from bootcamp.messenger.models import Message
 
+from friendship.models import Friend, Follow, FriendshipRequest, FriendshipManager
 
 def home(request):
     if request.user.is_authenticated():
@@ -65,6 +66,17 @@ def profile(request, username):
     messages_count = Message.objects.filter(
         Q(from_user=page_user) | Q(user=page_user)).count()
     data, datepoints = Activity.daily_activity(page_user)
+
+    are_friends = Friend.objects.are_friends(request.user, page_user)
+    has_friendship_request_to_page_user = FriendshipRequest.objects.filter(from_user=request.user, to_user=page_user).count() != 0
+    friendship_request_from_page_user = FriendshipRequest.objects.filter(from_user=page_user, to_user=request.user).first()
+    has_friendship_request_from_page_user = friendship_request_from_page_user is not None
+
+    is_friendship_request_enabled = (request.user != page_user) and \
+            not has_friendship_request_to_page_user and \
+            not has_friendship_request_from_page_user and \
+            not are_friends
+
     data = {
         'page_user': page_user,
         'feeds_count': feeds_count,
@@ -81,7 +93,12 @@ def profile(request, username):
         'line_data': data,
         'feeds': feeds,
         'from_feed': from_feed,
-        'page': 1
+        'page': 1,
+        'is_frienship_request_enabled': is_friendship_request_enabled,
+        'are_friends': are_friends,
+        'has_friendship_request_to_page_user': has_friendship_request_to_page_user,
+        'has_friendship_request_from_page_user': has_friendship_request_from_page_user,
+        'friendship_request_from_page_user': friendship_request_from_page_user
         }
     return render(request, 'core/profile.html', data)
 
