@@ -14,5 +14,6 @@ urlpatterns = [
     url(r'^update/$', views.update, name='update'),
     url(r'^track_comments/$', views.track_comments, name='track_comments'),
     url(r'^remove/$', views.remove, name='remove_feed'),
+    url(r'^retweet/$', views.retweet, name='retweet'),
     url(r'^(\d+)/$', views.feed, name='feed'),
 ]

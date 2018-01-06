@@ -19,6 +19,7 @@ class Profile(models.Model):
     location = models.CharField(max_length=50, null=True, blank=True)
     url = models.CharField(max_length=50, null=True, blank=True)
     job_title = models.CharField(max_length=50, null=True, blank=True)
+    birth_date = models.DateField(null=True, blank=True)
 
     class Meta:
         db_table = 'auth_profile'
@@ -140,6 +141,20 @@ class Profile(models.Model):
                 to_user=answer.user,
                 answer=answer).delete()
 
+    def notify_friendship_request(self, friendship_request):
+        if self.user != friendship_request.to_user:
+            Notification(notification_type=Notification.FRIENDSHIP_REQUESTED,
+                         from_user=friendship_request.from_user, to_user=friendship_request.to_user).save()
+
+    def notify_friendship_request_accept(self, friendship_request):
+        if self.user != friendship_request.to_user:
+            Notification(notification_type=Notification.FRIENDSHIP_REQUEST_ACCEPTED,
+                         from_user=friendship_request.to_user, to_user=friendship_request.from_user).save()
+
+    def notify_friendship_request_reject(self, friendship_request):
+        if self.user != friendship_request.to_user:
+            Notification(notification_type=Notification.FRIENDSHIP_REQUEST_REJECTED,
+                         from_user=friendship_request.to_user, to_user=friendship_request.from_user).save()
 
 def create_user_profile(sender, instance, created, **kwargs):
     if created:

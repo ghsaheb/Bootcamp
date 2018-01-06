@@ -3,6 +3,9 @@
 
 <li feed-id="{{ feed.pk }}" csrf="{{ csrf_token }}">
   <div class="feed-container">
+  {% if feed.is_retweet %}
+      <span class="glyphicon glyphicon-retweet" style="color: #5cb85c;padding-left: 16px; "></span> <div style="color: #999999;display: inline;font-size: 9pt;">Retweeted from {{ feed.get_source_feed.user.username }}</div>
+  {% endif %}
     <a href="{% url 'profile' feed.user.username %}"><img src="{{ feed.user.profile.get_picture }}" class="user"></a>
     <div class="post">
       {% if feed.user == user %}
@@ -16,13 +19,13 @@
           <a href="#" style="text-decoration: none;" class="like unlike">
             <span class="glyphicon glyphicon-thumbs-up"></span>
             <span class="text">{% trans 'Unlike' %}</span>
-            (<span class="like-count">{{ feed.likes }}</span>)
+            (<span class="like-count">{{ feed.get_likes_count }}</span>)
           </a>
         {% else %}
           <a href="#" style="text-decoration: none;" class="like">
             <span class="glyphicon glyphicon-thumbs-up"></span>
             <span class="text">{% trans 'Like' %}</span>
-            (<span class="like-count">{{ feed.likes }}</span>)
+            (<span class="like-count">{{ feed.get_likes_count }}</span>)
           </a>
         {% endif %}
 
@@ -40,7 +43,11 @@
 
         <a href="#" style="text-decoration: none;" class="comment">
           <span class="glyphicon glyphicon-comment"></span> {% trans 'Comment' %}
-          (<span class="comment-count">{{ feed.comments }}</span>)
+          (<span class="comment-count">{{ feed.get_comments_count }}</span>)
+        </a>
+        <a href="#" style="text-decoration: none;" class="retweet">
+          <span class="glyphicon glyphicon-retweet"></span> {% trans 'Retweet' %}
+          (<span class="retweet-count">{{ feed.get_retweets_count }}</span>)
         </a>
       </div>
       <div class="comments">

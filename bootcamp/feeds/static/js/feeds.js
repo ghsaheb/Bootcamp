@@ -117,7 +117,41 @@ $(function () {
   });
 // ***************** ***************** ***************** ***************** ***************** *****************
 
-  $("ul.stream").on("click", ".comment", function () { 
+  $("ul.stream").on("click", ".comment", function () {
+  $("ul.stream").on("click", ".retweet", function () {
+    var last_feed = $(".stream li:first-child").attr("feed-id");
+    if (last_feed == undefined) {
+      last_feed = "0";
+    }
+    var li = $(this).closest("li");
+    var feed = $(li).attr("feed-id");
+    var csrf = $(li).attr("csrf");
+    $.ajax({
+      url: '/feeds/retweet/',
+      data: {
+        'last_feed' : last_feed,
+        'feed': feed,
+        'csrfmiddlewaretoken': csrf
+
+      },
+      type: 'post',
+      cache: false,
+      success: function (data) {
+        // if ($(".like", li).hasClass("unlike")) {
+        //   $(".like", li).removeClass("unlike");
+        //   $(".like .text", li).text("Like");
+        // }
+        // else {
+        //   $(".like", li).addClass("unlike");
+        //   $(".like .text", li).text("Unlike");
+        // }
+        // $(".like .like-count", li).text(data);
+      }
+    });
+    return false;
+  });
+
+  $("ul.stream").on("click", ".comment", function () {
     var post = $(this).closest(".post");
     if ($(".comments", post).hasClass("tracking")) {
       $(".comments", post).slideUp();
@@ -266,7 +300,6 @@ $(function () {
           $.each(data, function(id, feed) {
               var li = $("li[feed-id='" + id + "']");
               $(".like-count", li).text(feed.likes);
-              $(".spam-count", li).text(feed.spams);
               $(".comment-count", li).text(feed.comments);
           });
         },

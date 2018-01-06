@@ -23,6 +23,7 @@ urlpatterns = [
     url(r'^settings/password/$', core_views.password, name='password'),
     url(r'^network/$', core_views.network, name='network'),
     url(r'^feeds/', include('bootcamp.feeds.urls')),
+    url(r'^friends/', include('bootcamp.friends.urls')),
     url(r'^questions/', include('bootcamp.questions.urls')),
     url(r'^articles/', include('bootcamp.articles.urls')),
     url(r'^messages/', include('bootcamp.messenger.urls')),
@@ -38,7 +39,7 @@ urlpatterns = [
     url(r'^search/$', search_views.search, name='search'),
     url(r'^(?P<username>[^/]+)/$', core_views.profile, name='profile'),
     url(r'^i18n/', include('django.conf.urls.i18n', namespace='i18n')),
-
+    url(r'^friendship/', include('friendship.urls'))
 ]
 
 if settings.DEBUG:

@@ -19,6 +19,7 @@ class Feed(models.Model):
     likes = models.IntegerField(default=0)
     spams = models.IntegerField(default=0)
     comments = models.IntegerField(default=0)
+    source_feed = models.ForeignKey('Feed', null=True, blank=True, related_name='retweet_source_feed')
 
     class Meta:
         verbose_name = _('Feed')
@@ -26,6 +27,9 @@ class Feed(models.Model):
         ordering = ('-date',)
 
     def __str__(self):
+        if self.is_retweet():
+            return self.get_source_feed().__str__()
+
         return self.post
 
     @staticmethod
@@ -42,9 +46,15 @@ class Feed(models.Model):
         return feeds
 
     def get_comments(self):
+        if self.is_retweet():
+            return self.get_source_feed().get_comments()
+
         return Feed.objects.filter(parent=self).order_by('date')
 
     def calculate_likes(self):
+        if self.is_retweet():
+            return self.get_source_feed().calculate_likes()
+
         likes = Activity.objects.filter(activity_type=Activity.LIKE,
                                         feed=self.pk).count()
         self.likes = likes
@@ -52,6 +62,9 @@ class Feed(models.Model):
         return self.likes
 
     def get_likes(self):
+        if self.is_retweet():
+            return self.get_source_feed().get_likes()
+
         likes = Activity.objects.filter(activity_type=Activity.LIKE,
                                         feed=self.pk)
         return likes
@@ -83,11 +96,17 @@ class Feed(models.Model):
         return spammers
 
     def calculate_comments(self):
+        if self.is_retweet():
+            return self.get_source_feed().calculate_comments()
+
         self.comments = Feed.objects.filter(parent=self).count()
         self.save()
         return self.comments
 
     def comment(self, user, post):
+        if self.is_retweet():
+            return self.get_source_feed().comment(user, post)
+
         feed_comment = Feed(user=user, post=post, parent=self)
         feed_comment.save()
         self.comments = Feed.objects.filter(parent=self).count()
@@ -95,4 +114,49 @@ class Feed(models.Model):
         return feed_comment
 
     def linkfy_post(self):
+        if self.is_retweet():
+            return self.get_source_feed().linkfy_post()
+
         return bleach.linkify(escape(self.post))
+
+    def retweet(self, user):
+        if self.is_retweet():
+            return self.get_source_feed().retweet(user)
+
+        retweet_feed = Feed(user=user, source_feed=self)
+        retweet_feed.save()
+
+        return retweet_feed
+
+    def is_retweet(self):
+        return self.source_feed is not None
+
+    def get_source_feed(self):
+        if self.is_retweet():
+            return self.source_feed.get_source_feed()
+
+        return self
+
+    def get_post(self):
+        if self.is_retweet():
+            return self.get_source_feed().get_post()
+
+        return self.post
+
+    def get_likes_count(self):
+        if self.is_retweet():
+            return self.get_source_feed().get_likes_count()
+
+        return self.likes
+
+    def get_comments_count(self):
+        if self.is_retweet():
+            return self.get_source_feed().get_comments_count()
+
+        return self.comments
+
+    def get_retweets_count(self):
+        if self.is_retweet():
+            return self.get_source_feed().get_retweets_count()
+
+        return Feed.objects.filter(source_feed=self).count()
