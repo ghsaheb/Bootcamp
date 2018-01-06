@@ -14,6 +14,7 @@ from django.utils.html import escape
 class Activity(models.Model):
     FAVORITE = 'F'
     LIKE = 'L'
+    SPAM = 'S'
     FRIENDSHIP_REQUEST = 'Q'
     FRIENDSHIP_REQUEST_ACCEPT = 'A'
     FRIENDSHIP_REQUEST_REJECT = 'R'

@@ -117,7 +117,6 @@ $(function () {
   });
 // ***************** ***************** ***************** ***************** ***************** *****************
 
-  $("ul.stream").on("click", ".comment", function () {
   $("ul.stream").on("click", ".retweet", function () {
     var last_feed = $(".stream li:first-child").attr("feed-id");
     if (last_feed == undefined) {

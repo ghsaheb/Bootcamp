@@ -204,8 +204,7 @@ def update(request):
 
     dump = {}
     for feed in feeds:
-        dump[feed.pk] = {'likes': feed.likes, 'spams': feed.spams, 'comments': feed.comments}
-        dump[feed.pk] = {'likes': feed.get_likes_count(), 'comments': feed.get_comments_count()}
+        dump[feed.pk] = {'likes': feed.get_likes_count(), 'spams': feed.get_spams_count(), 'comments': feed.get_comments_count()}
 
     data = json.dumps(dump)
     return HttpResponse(data, content_type='application/json')

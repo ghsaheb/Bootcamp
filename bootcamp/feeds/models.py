@@ -77,6 +77,9 @@ class Feed(models.Model):
         return likers
 
     def calculate_spams(self):
+        if self.is_retweet():
+            return self.get_source_feed().calculate_spams()
+
         spams = Activity.objects.filter(activity_type=Activity.SPAM,
                                         feed=self.pk).count()
         self.spams = spams
@@ -84,11 +87,17 @@ class Feed(models.Model):
         return self.spams
 
     def get_spams(self):
+        if self.is_retweet():
+            return self.get_source_feed().get_spams()
+
         spams = Activity.objects.filter(activity_type=Activity.SPAM,
                                         feed=self.pk)
         return spams
 
     def get_spammers(self):
+        if self.is_retweet():
+            return self.get_source_feed().get_spammers()
+
         spams = self.get_spams()
         spammers = []
         for spam in spams:
@@ -149,11 +158,19 @@ class Feed(models.Model):
 
         return self.likes
 
+    def get_spams_count(self):
+        if self.is_retweet():
+            return self.get_source_feed().get_spams_count()
+
+        return self.spams
+
     def get_comments_count(self):
         if self.is_retweet():
             return self.get_source_feed().get_comments_count()
 
         return self.comments
+
+
 
     def get_retweets_count(self):
         if self.is_retweet():
