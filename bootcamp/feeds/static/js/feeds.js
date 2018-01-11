@@ -89,7 +89,6 @@ $(function () {
 
 // ***************** ***************** ***************** ***************** ***************** *****************
   $("ul.stream").on("click", ".spam", function () {
-    console.log("JJJJJJ");
     var li = $(this).closest("li");
     var feed = $(li).attr("feed-id");
     var csrf = $(li).attr("csrf");
@@ -110,7 +109,13 @@ $(function () {
           $(".spam", li).addClass("unspam");
           $(".spam .text", li).text("Unspam");
         }
+        if (data >= 5) {
+          $("ul.stream li[source-feed=" + feed + "]").remove();
+        }
+        else {
         $(".spam .spam-count", li).text(data);
+
+        }
       }
     });
     return false;

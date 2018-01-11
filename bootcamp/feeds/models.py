@@ -38,7 +38,7 @@ class Feed(models.Model):
             feeds = Feed.objects.filter(parent=None, id__lte=from_feed, spams__lt=5)
         else:
             feeds = Feed.objects.filter(parent=None, spams__lt=5)
-        return feeds
+        return filter(lambda x: x.get_spams_count() < 5, feeds)
 
     @staticmethod
     def get_feeds_after(feed):
