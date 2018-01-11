@@ -151,6 +151,7 @@ class Notification(models.Model):
     def __str__(self):
         if self.notification_type == self.LIKED:
             return self._LIKED_TEMPLATE.format(
+                escape(self.from_user.username),
                 escape(self.from_user.profile.get_screen_name()),
                 self.feed.pk,
                 escape(self.get_summary(self.feed.post))
