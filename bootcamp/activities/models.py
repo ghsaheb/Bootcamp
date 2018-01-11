@@ -124,7 +124,7 @@ class Notification(models.Model):
     _FRIENDSHIP_REQUESTED_TEMPLATE = '<a href="/{0}">{0} sent a friend request</a>'  # noqa: E501
     _FRIENDSHIP_REQUEST_ACCEPTED_TEMPLATE = '<a href="/{0}">{0} accepted your friend request</a>'  # noqa: E501
     _FRIENDSHIP_REQUEST_REJECTED_TEMPLATE = '<a href="/{0}">{0} rejected your friend request</a>'  # noqa: E501
-    _SPAMED_TEMPLATE = '<a href="/{0}/">{1}</a> spamed your post: <a href="/feeds/{2}/">{3}</a>'  # noqa: E501
+    _SPAMED_TEMPLATE = '<a href="/feeds/{0}/">Your post was spammed {1} times</a>'  # noqa: E501
     _COMMENTED_TEMPLATE = '<a href="/{0}/">{1}</a> commented on your post: <a href="/feeds/{2}/">{3}</a>'  # noqa: E501
     _FAVORITED_TEMPLATE = '<a href="/{0}/">{1}</a> favorited your question: <a href="/questions/{2}/">{3}</a>'  # noqa: E501
     _ANSWERED_TEMPLATE = '<a href="/{0}/">{1}</a> answered your question: <a href="/questions/{2}/">{3}</a>'  # noqa: E501
@@ -151,17 +151,14 @@ class Notification(models.Model):
     def __str__(self):
         if self.notification_type == self.LIKED:
             return self._LIKED_TEMPLATE.format(
-                escape(self.from_user.username),
                 escape(self.from_user.profile.get_screen_name()),
                 self.feed.pk,
                 escape(self.get_summary(self.feed.post))
                 )
         elif self.notification_type == self.SPAMED:
             return self._SPAMED_TEMPLATE.format(
-                escape(self.from_user.username),
-                escape(self.from_user.profile.get_screen_name()),
                 self.feed.pk,
-                escape(self.get_summary(self.feed.post))
+                self.feed.get_spams_count()
                 )
         elif self.notification_type == self.FRIENDSHIP_REQUESTED:
             return self._FRIENDSHIP_REQUESTED_TEMPLATE.format(

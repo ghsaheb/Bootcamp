@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, render
 from django.template.context_processors import csrf
 from django.template.loader import render_to_string
 
-from bootcamp.activities.models import Activity
+from bootcamp.activities.models import Activity, Notification
 from bootcamp.decorators import ajax_required
 from bootcamp.feeds.models import Feed
 
@@ -156,8 +156,11 @@ def spam(request):
     user = request.user
     spam = Activity.objects.filter(activity_type=Activity.SPAM, feed=feed.id,
                                    user=user)
+    Notification.objects.filter(feed=feed, notification_type=Notification.SPAMED).delete()
+
     if spam:
-        user.profile.unotify_spamed(feed)
+        if feed.get_spams_count() > 1:
+            user.profile.notify_spamed(feed)
         spam.delete()
 
     else:
