@@ -1,7 +1,7 @@
 {% load i18n %}
 {% load humanize %}
 
-<li feed-id="{{ feed.pk }}" csrf="{{ csrf_token }}">
+<li feed-id="{{ feed.pk }}" csrf="{{ csrf_token }}" source-feed="{{ feed.get_source_feed.id }}">
   <div class="feed-container">
   {% if feed.is_retweet %}
       <span class="glyphicon glyphicon-retweet" style="color: #5cb85c;padding-left: 16px; "></span> <div style="color: #999999;display: inline;font-size: 9pt;">Retweeted from {{ feed.get_source_feed.user.username }}</div>
@@ -32,12 +32,12 @@
         {% if user in feed.get_spammers %}
           <a href="#" style="text-decoration: none;" class="spam unspam">
             <span class="text">{% trans 'Unspam' %}</span>
-            (<span class="spam-count">{{ feed.spams }}</span>)
+            (<span class="spam-count">{{ feed.get_spams_count }}</span>)
           </a>
         {% else %}
           <a href="#" style="text-decoration: none;" class="spam">
             <span class="text">{% trans 'Spam' %}</span>
-            (<span class="spam-count">{{ feed.spams }}</span>)
+            (<span class="spam-count">{{ feed.get_spams_count }}</span>)
           </a>
         {% endif %}
 
