@@ -11,6 +11,7 @@ from django.template.loader import render_to_string
 from bootcamp.activities.models import Activity, Notification
 from bootcamp.decorators import ajax_required
 from bootcamp.feeds.models import Feed
+from friendship.models import Friend
 
 FEEDS_NUM_PAGES = 10
 
@@ -18,6 +19,10 @@ FEEDS_NUM_PAGES = 10
 @login_required
 def feeds(request):
     all_feeds = Feed.get_feeds()
+    for x in all_feeds:
+        if x.user != request.user:
+            if not Friend.objects.are_friends(request.user, x.user):
+                all_feeds = all_feeds.exclude(user=x.user)
     paginator = Paginator(all_feeds, FEEDS_NUM_PAGES)
     feeds = paginator.page(1)
     from_feed = -1
@@ -106,7 +111,10 @@ def check(request):
     feeds = Feed.get_feeds_after(last_feed)
     if feed_source != 'all':
         feeds = feeds.filter(user__id=feed_source)
-
+    for x in feeds:
+        if x.user != request.user:
+            if not Friend.objects.are_friends(request.user, x.user):
+                feeds = feeds.exclude(user=x.user)
     count = feeds.count()
     return HttpResponse(count)
 
